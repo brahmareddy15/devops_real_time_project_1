@@ -41,11 +41,11 @@ pipeline {
             steps {
                 sh 'mvn sonar:sonar -Dsonar.projectName=$JOB_NAME \
                     -Dsonar.projectKey=$JOB_NAME \
-                    -Dsonar.host.url=http://52.53.236.144:9000 \
+                    -Dsonar.host.url=http://54.193.7.68:9000 \
                     -Dsonar.token=$sonar_token'
             }
         } 
-     
+        
         stage('COPY JAR & DOCKERFILE') {
             steps {
                 sh 'ansible-playbook playbooks/create_directory.yml'
@@ -65,5 +65,13 @@ pipeline {
                     --extra-vars "dockerhub_pass=$dockerhub_pass"'              
             }
         }
+        
+        stage('DEPLOYMENT ON EKS') {
+            steps {
+                sh 'ansible-playbook playbooks/create_pod_on_eks.yml \
+                    --extra-vars "JOB_NAME=$JOB_NAME"'
+            }            
+        }          
+
     }
-}  
+}      
